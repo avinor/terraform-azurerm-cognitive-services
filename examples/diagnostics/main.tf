@@ -1,7 +1,7 @@
 module "cognitive-services" {
-  source = "../../"
+  source = "../.."
 
-  name                = "cognitive-services-face"
+  name                = "face"
   resource_group_name = "cognitive-services-rg"
   location            = "westeurope"
 
