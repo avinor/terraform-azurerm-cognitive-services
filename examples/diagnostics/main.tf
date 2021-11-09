@@ -1,12 +1,20 @@
 module "cognitive-services" {
   source = "../.."
 
-  name                = "face"
+  name                = "cognitive-services"
   resource_group_name = "cognitive-services-rg"
   location            = "westeurope"
 
-  sku_name = "F0"
-  kind     = "Face"
+  cognitive_services_types = {
+    face = {
+      sku_name = "F0"
+      kind     = "Face"
+    }
+    computerVision = {
+      sku_name = "F0"
+      kind     = "ComputerVision"
+    }
+  }
 
   tags = {
     tag1 = "value1"

@@ -33,25 +33,32 @@ locals {
 resource "azurerm_resource_group" "main" {
   name     = var.resource_group_name
   location = var.location
+
+  tags = var.tags
 }
 
 resource "azurerm_cognitive_account" "main" {
-  name                = "${var.name}-cognitive-services"
+  for_each = var.cognitive_services_types
+
+  name                = "${each.value.kind}-cog"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
-  kind                = var.kind
-  sku_name            = var.sku_name
+  kind                = each.value.kind
+  sku_name            = each.value.sku_name
   tags                = var.tags
 }
 
 data "azurerm_monitor_diagnostic_categories" "default" {
-  resource_id = azurerm_cognitive_account.main.id
+  for_each = var.cognitive_services_types
+
+  resource_id = azurerm_cognitive_account.main[each.key].id
 }
 
 resource "azurerm_monitor_diagnostic_setting" "cognitive-services" {
-  count                          = var.diagnostics != null ? 1 : 0
+  for_each = var.cognitive_services_types
+
   name                           = "${var.name}-ns-diag"
-  target_resource_id             = azurerm_cognitive_account.main.id
+  target_resource_id             = azurerm_cognitive_account.main[each.key].id
   log_analytics_workspace_id     = local.parsed_diag.log_analytics_id
   eventhub_authorization_rule_id = local.parsed_diag.event_hub_auth_id
   eventhub_name                  = local.parsed_diag.event_hub_auth_id != null ? var.diagnostics.eventhub_name : null
@@ -61,7 +68,7 @@ resource "azurerm_monitor_diagnostic_setting" "cognitive-services" {
   # All other categories are created with enabled = false to prevent TF from showing changes happening with each plan/apply.
   # Ref: https://github.com/terraform-providers/terraform-provider-azurerm/issues/7235
   dynamic "log" {
-    for_each = data.azurerm_monitor_diagnostic_categories.default.logs
+    for_each = data.azurerm_monitor_diagnostic_categories.default[each.key].logs
     content {
       category = log.value
       enabled  = contains(local.parsed_diag.log, "all") || contains(local.parsed_diag.log, log.value)
@@ -77,7 +84,7 @@ resource "azurerm_monitor_diagnostic_setting" "cognitive-services" {
   # All other categories are created with enabled = false to prevent TF from showing changes happening with each plan/apply.
   # Ref: https://github.com/terraform-providers/terraform-provider-azurerm/issues/7235
   dynamic "metric" {
-    for_each = data.azurerm_monitor_diagnostic_categories.default.metrics
+    for_each = data.azurerm_monitor_diagnostic_categories.default[each.key].metrics
     content {
       category = metric.value
       enabled  = contains(local.parsed_diag.metric, "all") || contains(local.parsed_diag.metric, metric.value)

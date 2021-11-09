@@ -10,16 +10,13 @@ variable "location" {
   description = "The Azure Region in which to create resource."
 }
 
-variable "kind" {
-  description = "Specifies the type of Cognitive Service Account that should be created. Possible values can be viewed in README.md. Changing this forces a new resource to be created."
-  type        = string
-  default     = ""
-}
-
-variable "sku_name" {
-  description = "Specifies the SKU Name for this Cognitive Service Account. Possible values can be viewed in README.md"
-  type        = string
-  default     = ""
+variable "cognitive_services_types" {
+  description = "List of cognitive services to create. Possible values for kind and sku_name can be viewed in README.md"
+  type = map(object({
+    kind     = string
+    sku_name = string
+  }))
+  default = {}
 }
 
 variable "tags" {
