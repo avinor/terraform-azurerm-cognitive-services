@@ -22,9 +22,9 @@ module "cognitive-services" {
 
   diagnostics = {
     destination   = "test"
-    eventhub_name = "diagnostics",
-    logs          = ["all"],
-    metrics       = ["all"],
+    eventhub_name = "diagnostics"
+    logs          = ["all"]
+    metrics       = ["all"]
   }
 
 }

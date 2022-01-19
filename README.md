@@ -4,7 +4,7 @@ A terraform module for Azure Cognitive Services such as Face API and Computer Vi
 
 ## Usage
 
-Example that shows configuration for deployment of cogtnitive service Face API 
+Example that shows configuration for deployment of cognitive service Face API 
 
 ```terraform
 module "cognitive-services" {
