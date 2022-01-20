@@ -50,12 +50,19 @@ resource "azurerm_cognitive_account" "main" {
   # Is required if network_acls is used. Issue registered here https://github.com/hashicorp/terraform-provider-azurerm/issues/10041
   custom_subdomain_name = each.value.custom_subdomain_name
 
-  network_acls {
-    default_action = var.network_acls.default_action
-    ip_rules = var.network_acls.ip_rules
-    virtual_network_rules {
-      subnet_id = var.network_acls.virtual_network_rules.subnet_id
-      ignore_missing_vnet_service_endpoint = var.network_acls.virtual_network_rules.ignore_missing_vnet_service_endpoint
+  dynamic "network_acls" {
+    for_each = var.network_acls != null ? ["true"] : []
+    content {
+      default_action = var.network_acls.default_action
+      ip_rules       = var.network_acls.ip_rules
+
+      dynamic "virtual_network_rules" {
+        for_each = var.network_acls.virtual_network_rules != null ? ["true"] : []
+        content {
+          subnet_id                            = var.network_acls.virtual_network_rules.subnet_id
+          ignore_missing_vnet_service_endpoint = var.network_acls.virtual_network_rules.ignore_missing_vnet_service_endpoint
+        }
+      }
     }
   }
 }
